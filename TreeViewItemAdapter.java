@@ -8,6 +8,7 @@ import ru.inversion.tds.TreeDataSetItemEvent;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /** */
@@ -175,9 +176,11 @@ public class TreeViewItemAdapter<P>
 
     /** */
     @Override
-    public List<ITreeDataSetItem<P>> getChildrenList() {
-        return children();
+    public List<ITreeDataSetItem<P>> getChildrenList()
+    {
+        return Collections.unmodifiableList(children());
     }
+
 
     /** */
     @Override
@@ -189,15 +192,13 @@ public class TreeViewItemAdapter<P>
     @Override
     public ITreeDataSet<P> getDataSet() {
 
-        if (dataSet != null) {
+        if( dataSet != null )
             return dataSet;
-        }
 
         ITreeDataSetItem<P> parent = getParentItem();
 
-        if (parent == null) {
+        if( parent == null )
             return null;
-        }
 
         return parent.getDataSet();
     }
@@ -208,9 +209,8 @@ public class TreeViewItemAdapter<P>
 
         TreeItem<P> parent = getParent();
 
-        if (parent instanceof ITreeDataSetItem) {
+        if( parent instanceof ITreeDataSetItem )
             return (ITreeDataSetItem<P>) parent;
-        }
 
         return null;
     }
