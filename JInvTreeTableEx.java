@@ -135,37 +135,60 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
     }
 
     /** */
-    public void selectItem(TreeItem<P> item) {
-
-        if (item == null
-                || getSelectionModel().getSelectedItem() == item
+    /** */
+    public void selectItem(TreeItem<P> item)
+    {
+        if( item == null
                 || getRoot() == null
-                || getRoot().getChildren().isEmpty()) {
+                || getRoot().getChildren().isEmpty() )
             return;
-        }
 
-        /*
-         * Корневой узел всегда невидимый.
-         */
-        if (getRoot() == item) {
-            item = getRoot().getChildren().get(0);
-        }
+        final TreeItem<P> target =
+                item == getRoot()
+                        ? getRoot().getChildren().get(0)
+                        : item;
 
-        expandParents(item);
+        selectItemLater(target, 1);
+    }
 
-        int index = getRow(item);
 
-        if (index == -1) {
-            index = 0;
-        }
+    /** */
+    private void selectItemLater(
+            TreeItem<P> item,
+            int retryCount
+    )
+    {
+        Platform.runLater(() -> {
 
-        if (!isItemVisible(index)) {
-            scrollTo(index);
-        }
+            if( item == null
+                    || getRoot() == null
+                    || getRoot().getChildren().isEmpty() )
+                return;
 
-        final int index1 = index;
+            expandParents(item);
 
-        Platform.runLater(() -> getSelectionModel().select(index1));
+            final int index = getRow(item);
+
+            /*
+             * После изменения структуры JavaFX может ещё
+             * не пересчитать visible rows.
+             *
+             * Никогда не подменяем отсутствующую строку нулевой.
+             */
+            if( index < 0 )
+            {
+                if( retryCount > 0 )
+                    selectItemLater(item, retryCount - 1);
+
+                return;
+            }
+
+            if( getSelectionModel().getSelectedItem() != item )
+                getSelectionModel().clearAndSelect(index);
+
+            if( !isItemVisible(index) )
+                scrollTo(index);
+        });
     }
 
     /** */
