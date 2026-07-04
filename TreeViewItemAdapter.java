@@ -129,36 +129,33 @@ public class TreeViewItemAdapter<P>
 
     /** */
     @Override
-    public void addChildrenAt(
-            int position,
-            List<ITreeDataSetItem<P>> newItems
-    ) {
-        if (newItems == null || newItems.isEmpty()) {
+    public void addChildrenAt( int position, List<ITreeDataSetItem<P>> newItems )
+    {
+        if( newItems == null || newItems.isEmpty() )
             return;
-        }
 
         int safePosition = position;
 
-        if (safePosition < 0) {
+        if( safePosition < 0 )
             safePosition = 0;
-        }
 
-        if (safePosition > getChildren().size()) {
+        if( safePosition > getChildren().size() )
             safePosition = getChildren().size();
-        }
 
-        List<TreeViewItemAdapter<P>> fxItems =
-                new ArrayList<>(newItems.size());
+        List<TreeViewItemAdapter<P>> fxItems = new ArrayList<>(newItems.size());
 
-        for (ITreeDataSetItem<P> child : newItems) {
+        for(ITreeDataSetItem<P> child : newItems )
+        {
             TreeViewItemAdapter<P> item = cast(child);
-
             validateChildForAttach(item);
+
+            if( getChildren().contains(item) || fxItems.contains(item) )
+                throw new IllegalArgumentException( "Child TreeItem is already attached to this parent" );
 
             fxItems.add(item);
         }
 
-        getChildren().addAll(safePosition, fxItems);
+        getChildren().addAll( safePosition, fxItems );
     }
 
     /** */
