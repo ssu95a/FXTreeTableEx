@@ -712,10 +712,54 @@ public class TSFXAdapter<P>
     @Override
     public void rowsOperation(TreeDataSetRowsEvent<P> event)
     {
-        if( event.isAfter() )
+        if( !event.isAfter() )
+            return;
+
+        final boolean delete =
+                event.getItemOperation()
+                        == DataSetRowEvent.RowOperationEnum.DELETE;
+
+        updateEmptyProperty(delete);
+
+        /*
+         * Children у TreeViewItemAdapter уже являются частью
+         * JavaFX-дерева и изменяются напрямую.
+         *
+         * Полная замена скрытого root после child-delete
+         * сбрасывает selection на первую строку.
+         */
+        if( delete && !isRootDelete(event) )
+            return;
+
+        refreshImpl();
+    }
+
+
+    /** */
+    private boolean isRootDelete(TreeDataSetRowsEvent<P> event)
+    {
+        if( event.getItems() == null || event.getItems().isEmpty() )
+            return true;
+
+        final TreeItem<P> hiddenRoot = treeTableView.getRoot();
+
+        if( hiddenRoot == null )
+            return true;
+
+        for( ITreeDataSetItem<P> item : event.getItems() )
         {
-            updateEmptyProperty(event.getItemOperation() == DataSetRowEvent.RowOperationEnum.DELETE);
-            refreshImpl();
+            final TreeItem<P> treeItem = asTreeItem(item);
+
+            /*
+             * При удалении root он ещё физически находится
+             * среди детей скрытого JavaFX-root.
+             *
+             * Удалённый child уже отсоединён от своего parent.
+             */
+            if( treeItem.getParent() == hiddenRoot )
+                return true;
         }
+
+        return false;
     }
 }
