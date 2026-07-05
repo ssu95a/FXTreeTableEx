@@ -4,12 +4,10 @@ import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import ru.inversion.tds.ITreeDataSet;
 import ru.inversion.tds.ITreeDataSetItem;
+import ru.inversion.tds.TreeDataSetItem;
 import ru.inversion.tds.TreeDataSetItemEvent;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /** */
 public class TreeViewItemAdapter<P>
@@ -231,25 +229,42 @@ public class TreeViewItemAdapter<P>
     }
 
     /** */
-    private void validateChildForAttach(TreeViewItemAdapter<P> item)
+    /** */
+    private void validateChildForAttach(ITreeDataSetItem<P> child)
     {
-        if( item == this )
-            throw new IllegalArgumentException( "Can not add item as child of itself" );
+        Objects.requireNonNull(child, "'child' is null");
 
-        /*
-         * Нельзя прикреплять собственного предка как child.
-         */
-        TreeItem<P> parent = getParent();
+        if( child == this )
+            throw new IllegalArgumentException(
+                    "Can not add item as child of itself"
+            );
 
-        while( parent != null )
+        ITreeDataSetItem<P> parentItem = getParentItem();
+
+        while( parentItem != null )
         {
-            if( parent == item )
-                throw new IllegalArgumentException( "Can not add ancestor item as child" );
+            if( parentItem == child )
+                throw new IllegalArgumentException(
+                        "Can not add ancestor item as child"
+                );
 
-            parent = parent.getParent();
+            parentItem = parentItem.getParentItem();
         }
 
-        if( item.getParent() != null && item.getParent() != this )
-            throw new IllegalArgumentException( "Child TreeItem already has another parent" );
-    }
-}
+        if( child instanceof TreeDataSetItem)
+        {
+            TreeDataSetItem<P> item =
+                    (TreeDataSetItem<P>) child;
+
+            if( item.getParentItem() != null && item.getParentItem() != this )
+                throw new IllegalArgumentException(
+                        "Child item already has another parent"
+                );
+        }
+        else if( child.getParentItem() != this )
+        {
+            throw new IllegalArgumentException(
+                    "Child item has incompatible parent"
+            );
+        }
+    }}
