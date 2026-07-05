@@ -134,62 +134,40 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
         return ((JInvTreeTableViewSkin)getSkin()).isIndexVisible(index);
     }
 
-    /** */
+
     /** */
     public void selectItem(TreeItem<P> item)
     {
-        if( item == null
-                || getRoot() == null
-                || getRoot().getChildren().isEmpty() )
+        if( item == null || getRoot() == null || getRoot().getChildren().isEmpty() )
             return;
 
-        final TreeItem<P> target =
-                item == getRoot()
-                        ? getRoot().getChildren().get(0)
-                        : item;
+        final TreeItem<P> target = item == getRoot() ? getRoot().getChildren().get(0) : item;
 
-        selectItemLater(target, 1);
-    }
-
-
-    /** */
-    private void selectItemLater(
-            TreeItem<P> item,
-            int retryCount
-    )
-    {
         Platform.runLater(() -> {
 
-            if( item == null
-                    || getRoot() == null
-                    || getRoot().getChildren().isEmpty() )
+            if( getRoot() == null || getRoot().getChildren().isEmpty() )
                 return;
 
-            expandParents(item);
+            expandParents(target);
 
-            final int index = getRow(item);
+            final int index = getRow(target);
 
             /*
-             * После изменения структуры JavaFX может ещё
-             * не пересчитать visible rows.
-             *
-             * Никогда не подменяем отсутствующую строку нулевой.
+             * Узел может быть уже удалён либо дерево
+             * ещё не содержит его после полной перестройки.
+             * В таком случае строку 0 не выбираем.
              */
             if( index < 0 )
-            {
-                if( retryCount > 0 )
-                    selectItemLater(item, retryCount - 1);
-
                 return;
-            }
 
-            if( getSelectionModel().getSelectedItem() != item )
+            if( getSelectionModel().getSelectedItem() != target )
                 getSelectionModel().clearAndSelect(index);
 
             if( !isItemVisible(index) )
                 scrollTo(index);
         });
     }
+
 
     /** */
     private void expandParents(TreeItem<P> item) {
