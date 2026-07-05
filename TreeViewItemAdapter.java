@@ -231,18 +231,25 @@ public class TreeViewItemAdapter<P>
     }
 
     /** */
-    private void validateChildForAttach(TreeViewItemAdapter<P> item) {
+    private void validateChildForAttach(TreeViewItemAdapter<P> item)
+    {
+        if( item == this )
+            throw new IllegalArgumentException( "Can not add item as child of itself" );
 
-        if (item == this) {
-            throw new IllegalArgumentException(
-                    "Can not add item as child of itself"
-            );
+        /*
+         * Нельзя прикреплять собственного предка как child.
+         */
+        TreeItem<P> parent = getParent();
+
+        while( parent != null )
+        {
+            if( parent == item )
+                throw new IllegalArgumentException( "Can not add ancestor item as child" );
+
+            parent = parent.getParent();
         }
 
-        if (item.getParent() != null && item.getParent() != this) {
-            throw new IllegalArgumentException(
-                    "Child TreeItem already has another parent"
-            );
-        }
+        if( item.getParent() != null && item.getParent() != this )
+            throw new IllegalArgumentException( "Child TreeItem already has another parent" );
     }
 }
