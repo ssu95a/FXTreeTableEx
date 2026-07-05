@@ -23,14 +23,12 @@ import ru.inversion.fx.form.controls.JInvTableColumn;
 import ru.inversion.fx.form.controls.renderer.Colorizer;
 import ru.inversion.fx.form.controls.renderer.IColoredCell;
 import ru.inversion.fx.form.controls.treetableex.cell.JInvTreeTableCell_Boolean;
-import ru.inversion.fx.form.controls.treetableex.cell.JInvTreeTableCell_Date;
 import ru.inversion.meta.IEntityProperty;
 import ru.inversion.utils.S;
 import ru.inversion.utils.Tags;
 import ru.inversion.utils.U;
 
 import java.lang.invoke.MethodHandles;
-import java.time.temporal.Temporal;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
@@ -108,10 +106,6 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
             final TableBooleanObservableValue<P> bval = new TableBooleanObservableValue(ep);
             setCellFactory     ( param -> new JInvTreeTableCell_Boolean());
             setCellValueFactory( param -> (ObservableValue<T>) bval.pojoInstance(param.getValue() == null ? null : param.getValue().getValue()) );
-        }
-        else if( ep.getType().isAssignableFrom(Temporal.class) )
-        {
-            Callback<TreeTableColumn<P,T>, TreeTableCell<P,T>> cellFactory = param -> new JInvTreeTableCell_Date();
         }
         else
         {
