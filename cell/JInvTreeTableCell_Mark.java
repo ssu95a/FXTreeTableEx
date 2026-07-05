@@ -33,23 +33,38 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
 
         checkBox.setOnAction((ActionEvent event) -> switchMark());
 
-        checkBox.addEventFilter(MouseEvent.MOUSE_RELEASED, (MouseEvent event) -> {
+        checkBox.addEventFilter( MouseEvent.MOUSE_RELEASED,
+                event -> {
 
-            if( event.isControlDown() && event.getButton().equals(MouseButton.PRIMARY) ) {
-                checkBox.selectedProperty().set(!checkBox.isSelected());
-                switchMark();
-            }
+                    if( event.getButton() != MouseButton.PRIMARY )
+                        return;
 
-            if (event.isShiftDown() && event.getButton().equals(MouseButton.PRIMARY)) {
+                    if( event.isControlDown() )
+                    {
+                        checkBox.setSelected(!checkBox.isSelected());
+                        switchMark();
 
-                TreeTableView<P> table = getTreeTableView();
+                        event.consume();
+                        return;
+                    }
 
-                if (table != null && getTreeTableRow() != null) {
-                    checkBox.selectedProperty().set(true);
-                    table.getSelectionModel().select(getTreeTableRow().getIndex());
+                    if( event.isShiftDown() )
+                    {
+                        final TreeTableView<P> table = getTreeTableView();
+
+                        if( table != null && getTreeTableRow() != null )
+                        {
+                            checkBox.setSelected(true);
+
+                            table.getSelectionModel().select( getTreeTableRow().getIndex() );
+
+                            switchMark();
+                        }
+
+                        event.consume();
+                    }
                 }
-            }
-        });
+        );
 
         this.getStyleClass().add("check-box-table-cell");
 
