@@ -724,4 +724,23 @@ public class TSFXAdapter<P>
             refreshImpl();
         }
     }
+
+
+    /** */
+    @Override
+    public void close()
+    {
+        final ITreeDataSet<P> dataSet = getTreeDataSet();
+
+        if( dataSet == null )
+            return;
+
+        dataSet.removeDataSetListener(this);
+        dataSet.removeRowsListener(this);
+
+        if( dataSet instanceof XXITreeDataSet )
+            ((XXITreeDataSet<P>)dataSet).removeMarkListener(this);
+
+        super.close();
+    }
 }
