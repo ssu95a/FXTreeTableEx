@@ -1,6 +1,5 @@
 package ru.inversion.fx.form.controls.treetableex;
 
-import javafx.css.PseudoClass;
 import javafx.geometry.Pos;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableRow;
@@ -8,7 +7,6 @@ import ru.inversion.fx.form.controls.renderer.Colorizer;
 import ru.inversion.fx.form.controls.renderer.IColoredCell;
 import ru.inversion.utils.S;
 
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -58,8 +56,8 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
 
         setId(null);
 
-        for( PseudoClass pseudoClass : new HashSet<>(getPseudoClassStates()) )
-             pseudoClassStateChanged( pseudoClass, false );
+//        for( PseudoClass pseudoClass : new HashSet<>(getPseudoClassStates()) )
+//             pseudoClassStateChanged( pseudoClass, false );
 
         clearColor();
     }
