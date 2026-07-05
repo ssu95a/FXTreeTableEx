@@ -16,32 +16,21 @@ public class JInvTreeTableCell_Boolean<P> extends JInvTreeTableCell<P,Boolean> {
         setText(S.EMPTY_STRING);
     }
 
-    protected void updateItem1( Boolean item, boolean empty) {
-
-        superUpdateItem( item, empty );
-
-        if( item == null || empty || !item )
-            setGraphic( null );
-        else
-            setGraphic( check );
-
-        applyRenderer(item, empty);
-    }
-
+    /** */
     @Override
-    protected void updateItem(Boolean item, boolean empty) {
-
+    protected void updateItem(Boolean item, boolean empty)
+    {
         superUpdateItem(item, empty);
 
-        setText(null);
-
-        if (empty || item == null || !item) {
-            setGraphic(null);
-        } else {
-            setGraphic(check);
+        if( empty || item == null )
+        {
+            clearCell();
+            return;
         }
 
-        applyRenderer(item, empty);
-    }
+        setText(null);
+        setGraphic(item ? check : null);
 
+        applyRenderer(item, false);
+    }
 }

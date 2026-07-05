@@ -8,6 +8,7 @@ import ru.inversion.fx.form.controls.renderer.Colorizer;
 import ru.inversion.fx.form.controls.renderer.IColoredCell;
 import ru.inversion.utils.S;
 
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -35,7 +36,7 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
 
         super.updateItem(item, empty);
 
-        if (empty || item == null) {
+        if( empty || item == null ) {
             clearCell();
             return;
         }
@@ -48,15 +49,17 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
 
     /** */
     protected void clearCell() {
+
         setText(null);
         setGraphic(null);
         setTooltip(null);
-        setStyle("");
+
+        setStyle(S.EMPTY_STRING);
+
         setId(null);
 
-        getPseudoClassStates().forEach(
-                pseudoClass -> pseudoClassStateChanged(pseudoClass, false)
-        );
+        for( PseudoClass pseudoClass : new HashSet<>(getPseudoClassStates()) )
+             pseudoClassStateChanged( pseudoClass, false );
 
         clearColor();
     }
