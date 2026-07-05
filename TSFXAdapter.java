@@ -30,6 +30,7 @@ import ru.inversion.meta.EntityMetadataFactory;
 import ru.inversion.meta.IEntityMetaData;
 import ru.inversion.meta.IEntityProperty;
 import ru.inversion.tds.*;
+import ru.inversion.utils.Checks;
 import ru.inversion.utils.S;
 import ru.inversion.utils.U;
 
@@ -125,20 +126,26 @@ public class TSFXAdapter<P>
                 }
             }
 
-            if( markMode != ItemMarkMode.NONE && treeDataSet instanceof XXITreeDataSet )
+            Checks.Require.object(markMode,"markMode");
+
+            if( markMode != ItemMarkMode.NONE )
             {
-                final XXITreeDataSet<P> xxiDs = (XXITreeDataSet<P>)treeDataSet;
-                if( !xxiDs.isSupportMark() ) {
-                    logger.warn( "Marker not working, the TreeDataSet with rowClass '" + xxiDs.getRowClass() + "' does not support it! Set 'markMode' to NONE!" );
+                if( !(treeDataSet instanceof XXITreeDataSet) )
+                {
+                    logger.warn( "Marker not working, TreeDataSet is not XXITreeDataSet. Set 'markMode' to NONE!" );
                     markMode = ItemMarkMode.NONE;
                 }
-//                else
-//                {
-//                    if( markHandler != null )
-//                        xxiDs.setMarkHandler(markHandler);
-//                }
-            }
+                else
+                {
+                    final XXITreeDataSet<P> xxiDs = (XXITreeDataSet<P>) treeDataSet;
 
+                    if( !xxiDs.isSupportMark() )
+                    {
+                        logger.warn( "Marker not working, the TreeDataSet with rowClass '" + xxiDs.getRowClass() + "' does not support it! Set 'markMode' to NONE!" );
+                        markMode = ItemMarkMode.NONE;
+                    }
+                }
+            }
             return new TSFXAdapter<>( treeDataSet, treeTable, expandLevel, markMode, cellValueChangeListener );
         }
     }

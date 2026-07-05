@@ -226,9 +226,8 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
     /** */
     public void collapse(TreeItem<P> item) {
 
-        if (item == null) {
+        if( item == null )
             return;
-        }
 
         collapseHelper(item);
         selectItem(item);
@@ -272,29 +271,17 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
             column.getColumns().forEach( (c)->getLeafColumnsHelper( c, list ) );
     }
 
-    transient private Boolean hasChildColumns = null;
-
     /** */
-    public List<TreeTableColumn<P, ?>> getLeafColumns(  ) {
+    public List<TreeTableColumn<P, ?>> getLeafColumns()
+    {
+        final List<TreeTableColumn<P, ?>> list =
+                new ArrayList<>();
 
-        if( hasChildColumns == null ) {
+        getColumns().forEach( column -> getLeafColumnsHelper(column, list) );
 
-            hasChildColumns = false;
-
-            for( TreeTableColumn<P,?> c : getColumns() )
-                 if( !c.getColumns().isEmpty() ) {
-                     hasChildColumns = true;
-                     break;
-                 }
-        }
-
-        if( !hasChildColumns )
-            return getColumns();
-
-        final List<TreeTableColumn<P,?>> list = new ArrayList<>();
-        getColumns().forEach( (c)->getLeafColumnsHelper( c, list ) );
         return list;
     }
+
 
     /** /
     public void initActionList( Object ... actionList )
@@ -320,8 +307,8 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
             }
         });
 
-        getColumns().addListener((InvalidationListener)observable -> hasChildColumns = null);
         initPlaceHolder();
+
         initMouse();
     }
 
