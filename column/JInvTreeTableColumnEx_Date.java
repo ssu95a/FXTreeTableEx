@@ -51,8 +51,10 @@ public class JInvTreeTableColumnEx_Date<P, T> extends JInvTreeTableColumnEx<P, T
 
         this.entityProperty = Objects.requireNonNull( ep, "'entityProperty' is null" );
 
-        if( !Temporal.class.isAssignableFrom( ep.getType() ) && Date.class.isAssignableFrom( ep.getType() ) )
-             throw new IllegalStateException(Tags.PRODUCT_LABEL + "Column '" + getFieldName() + "' is not date/time type" );
+        final Class<?> propertyType = ep.getType();
+
+        if( !Temporal.class.isAssignableFrom(propertyType) && !Date.class.isAssignableFrom(propertyType) )
+            throw new IllegalStateException( Tags.PRODUCT_LABEL + "Column '" + getFieldName() + "' is not date/time type" );
 
         this.converter = dateFormat.getStringConverter( ep.getType() );
 

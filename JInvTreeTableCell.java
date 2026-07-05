@@ -32,6 +32,7 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
 
     @Override
     protected void updateItem(T item, boolean empty) {
+
         super.updateItem(item, empty);
 
         if (empty || item == null) {
@@ -39,7 +40,7 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
             return;
         }
 
-        setText(getTreeTableColumn().getStringConverter().toString(item));
+        setText( getTreeTableColumn().getStringConverter().toString(item) );
         setGraphic(null);
 
         applyRenderer(item, false);
@@ -177,16 +178,23 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
     private void removeColorStyle() {
         removeColorStyle( null );
     }
-    private void removeColorStyle( String colors ) {
+    private void removeColorStyle(String colors)
+    {
         String style = getStyle();
-        if ( ru.inversion.utils.S.isNullOrEmpty( colors ) ){
-            colors = getColorStyleString();
-        }
 
-        if ( style.contains( colors ) ) {
-            style = style.substring( 0, style.indexOf( style ) );
-        }
-        setStyle( style );
+        if( S.isNullOrEmpty(colors) )
+            colors = getColorStyleString();
+
+        if( S.isNullOrEmpty(style) || S.isNullOrEmpty(colors) )
+            return;
+
+        final int index = style.indexOf(colors);
+
+        if( index < 0 )
+            return;
+
+        style = ( style.substring(0, index) + style.substring(index + colors.length()) ).trim();
+
+        setStyle(style);
     }
-    //endregion
 }
