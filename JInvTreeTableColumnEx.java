@@ -369,13 +369,16 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
     }
 
     // Убрать всю раскраску, заданную через addColor() в данном столбце
-    public void clearColor(){
-        BiConsumer<JInvTreeTableCell<P, T>, T> colorizer = ( cell, value ) -> cell.clearColor();
-        setCellRenderer( colorizer );
-        getProperties().put( COLUMN_COLOR_RENDERER, null );
-        setCellRenderer( null );
+    public void clearColor()
+    {
+        getProperties().remove(COLUMN_COLOR_RENDERER);
+
+        setCellRenderer( (cell, value) -> cell.clearColor() );
+
+        if( getTreeTableView() != null )
+            getTreeTableView().refresh();
     }
-//endregion
+
 
     final public String getToolTipText() {
         return toolTipTextProperty.get();

@@ -89,14 +89,16 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
 
     /** */
     @Override
-    public void updateItem(Boolean item, boolean empty) {
-
+    public void updateItem(Boolean item, boolean empty)
+    {
         superUpdateItem(item, empty);
 
-        if (empty || (leafOnly && !isLeaf())) {
+        if( empty || item == null || (leafOnly && !isLeaf()) )
+        {
             setText(null);
             setGraphic(null);
             checkBox.setSelected(false);
+
             switchMarkColorOnRow(false);
             applyRenderer(item, true);
             return;
@@ -105,13 +107,14 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
         setText(null);
         setGraphic(checkBox);
 
-        boolean selected = Boolean.TRUE.equals(item);
+        final boolean selected = Boolean.TRUE.equals(item);
 
         checkBox.setSelected(selected);
         switchMarkColorOnRow(selected);
 
         applyRenderer(item, false);
     }
+
 
     /** */
     @Override
