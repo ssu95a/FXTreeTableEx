@@ -10,29 +10,31 @@ import ru.inversion.tds.TreeDataSetItemEvent;
 import java.util.*;
 
 /** */
-public class TreeViewItemAdapter<P>
-        extends TreeItem<P>
-        implements ITreeDataSetItem<P> {
+public class TreeViewItemAdapter<P> extends TreeItem<P> implements ITreeDataSetItem<P> {
 
     private ITreeDataSet<P> dataSet;
 
-    /** for root items only */
+    /**
+     * for root items only
+     */
     public TreeViewItemAdapter(ITreeDataSet<P> dataSet) {
         this.dataSet = dataSet;
         init();
     }
 
-    /** for root items only */
-    public TreeViewItemAdapter(
-            ITreeDataSet<P> dataSet,
-            P value
-    ) {
+    /**
+     * for root items only
+     */
+    public TreeViewItemAdapter( ITreeDataSet<P> dataSet, P value )
+    {
         super(value);
         this.dataSet = dataSet;
         init();
     }
 
-    /** for root items only */
+    /**
+     * for root items only
+     */
     public TreeViewItemAdapter(
             ITreeDataSet<P> dataSet,
             P value,
@@ -43,17 +45,23 @@ public class TreeViewItemAdapter<P>
         init();
     }
 
-    /** */
+    /**
+     *
+     */
     public TreeViewItemAdapter() {
         init();
     }
 
-    /** */
+    /**
+     *
+     */
     public TreeViewItemAdapter(P value) {
         this(value, null);
     }
 
-    /** */
+    /**
+     *
+     */
     public TreeViewItemAdapter(
             P value,
             Node graphic
@@ -62,27 +70,22 @@ public class TreeViewItemAdapter<P>
         init();
     }
 
-    /** */
+    /**
+     *
+     */
     protected void init() {
         this.valueProperty().addListener(
-                (observable, oldValue, newValue) -> {
-                    ITreeDataSet<P> ds = getDataSet();
-
-                    if (ds != null) {
-                        ds.fireItemEvent(
-                                new TreeDataSetItemEvent<>(
-                                        TreeViewItemAdapter.this,
-                                        false,
-                                        oldValue,
-                                        newValue
-                                )
-                        );
-                    }
-                }
+            (observable, oldValue, newValue) -> {
+                ITreeDataSet<P> ds = getDataSet();
+                if (ds != null)
+                    ds.fireItemEvent( new TreeDataSetItemEvent<>( TreeViewItemAdapter.this, false, oldValue, newValue ) );
+            }
         );
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public boolean isLeaf() {
         return super.isLeaf();
@@ -90,7 +93,7 @@ public class TreeViewItemAdapter<P>
 
     /**
      * Перекрытый метод для выявления корневого узла.
-     *
+     * <p>
      * В TreeView необходимо задавать один root item,
      * а в модели может быть несколько root-узлов.
      * Поэтому скрытый JavaFX-root считаем внешним контейнером,
@@ -98,17 +101,20 @@ public class TreeViewItemAdapter<P>
      */
     @Override
     public boolean isRoot() {
-        return this.getParent() == null
-                || this.getParent().getParent() == null;
+        return this.getParent() == null || this.getParent().getParent() == null;
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public ITreeDataSetItem<P> newChildItem(P value) {
         return new TreeViewItemAdapter<>(value);
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public void addChild(ITreeDataSetItem<P> child) {
 
@@ -125,38 +131,40 @@ public class TreeViewItemAdapter<P>
         }
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
-    public void addChildrenAt( int position, List<ITreeDataSetItem<P>> newItems )
-    {
-        if( newItems == null || newItems.isEmpty() )
+    public void addChildrenAt(int position, List<ITreeDataSetItem<P>> newItems) {
+        if (newItems == null || newItems.isEmpty())
             return;
 
         int safePosition = position;
 
-        if( safePosition < 0 )
+        if (safePosition < 0)
             safePosition = 0;
 
-        if( safePosition > getChildren().size() )
+        if (safePosition > getChildren().size())
             safePosition = getChildren().size();
 
         List<TreeViewItemAdapter<P>> fxItems = new ArrayList<>(newItems.size());
 
-        for(ITreeDataSetItem<P> child : newItems )
-        {
+        for (ITreeDataSetItem<P> child : newItems) {
             TreeViewItemAdapter<P> item = cast(child);
             validateChildForAttach(item);
 
-            if( getChildren().contains(item) || fxItems.contains(item) )
-                throw new IllegalArgumentException( "Child TreeItem is already attached to this parent" );
+            if (getChildren().contains(item) || fxItems.contains(item))
+                throw new IllegalArgumentException("Child TreeItem is already attached to this parent");
 
             fxItems.add(item);
         }
 
-        getChildren().addAll( safePosition, fxItems );
+        getChildren().addAll(safePosition, fxItems);
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public void removeChildren(Collection<ITreeDataSetItem<P>> items) {
 
@@ -169,102 +177,101 @@ public class TreeViewItemAdapter<P>
         }
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
-    public List<ITreeDataSetItem<P>> getChildrenList()
-    {
+    public List<ITreeDataSetItem<P>> getChildrenList() {
         return Collections.unmodifiableList(children());
     }
 
 
-    /** */
+    /**
+     *
+     */
     @Override
     public int getChildCount() {
         return super.getChildren().size();
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public ITreeDataSet<P> getDataSet() {
 
-        if( dataSet != null )
+        if (dataSet != null)
             return dataSet;
 
         ITreeDataSetItem<P> parent = getParentItem();
 
-        if( parent == null )
+        if (parent == null)
             return null;
 
         return parent.getDataSet();
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public ITreeDataSetItem<P> getParentItem() {
 
         TreeItem<P> parent = getParent();
 
-        if( parent instanceof ITreeDataSetItem )
+        if (parent instanceof ITreeDataSetItem)
             return (ITreeDataSetItem<P>) parent;
 
         return null;
     }
 
-    /** */
+    /**
+     *
+     */
     @Override
     public void executeQuery() {
         throw new UnsupportedOperationException("executeQuery");
     }
 
-    /** */
+    /**
+     *
+     */
     @SuppressWarnings("unchecked")
     protected List<ITreeDataSetItem<P>> children() {
         return (List<ITreeDataSetItem<P>>) (Object) getChildren();
     }
 
-    /** */
+    /**
+     *
+     */
     @SuppressWarnings("unchecked")
     private TreeViewItemAdapter<P> cast(ITreeDataSetItem<P> item) {
         return (TreeViewItemAdapter<P>) item;
     }
 
-    /** */
-    /** */
-    private void validateChildForAttach(ITreeDataSetItem<P> child)
+    /**
+     *
+     */
+    private void validateChildForAttach( ITreeDataSetItem<P> child )
     {
-        Objects.requireNonNull(child, "'child' is null");
+        Objects.requireNonNull( child, "'child' is null" );
 
         if( child == this )
-            throw new IllegalArgumentException(
-                    "Can not add item as child of itself"
-            );
+            throw new IllegalArgumentException( "Can not add item as child of itself" );
 
         ITreeDataSetItem<P> parentItem = getParentItem();
 
-        while( parentItem != null )
+        while (parentItem != null)
         {
             if( parentItem == child )
-                throw new IllegalArgumentException(
-                        "Can not add ancestor item as child"
-                );
+                throw new IllegalArgumentException( "Can not add ancestor item as child" );
 
             parentItem = parentItem.getParentItem();
         }
 
-        if( child instanceof TreeDataSetItem)
-        {
-            TreeDataSetItem<P> item =
-                    (TreeDataSetItem<P>) child;
+        final ITreeDataSetItem<P> currentParent = child.getParentItem();
 
-            if( item.getParentItem() != null && item.getParentItem() != this )
-                throw new IllegalArgumentException(
-                        "Child item already has another parent"
-                );
-        }
-        else if( child.getParentItem() != this )
-        {
-            throw new IllegalArgumentException(
-                    "Child item has incompatible parent"
-            );
-        }
-    }}
+        if( currentParent != null && currentParent != this )
+            throw new IllegalArgumentException( "Child item already has another parent" );
+    }
+}

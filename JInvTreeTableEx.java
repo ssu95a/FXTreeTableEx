@@ -14,6 +14,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.input.ContextMenuEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.TextAlignment;
 import javafx.util.StringConverter;
@@ -163,6 +164,18 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
             if( getSelectionModel().getSelectedItem() != target )
                 getSelectionModel().clearAndSelect(index);
 
+            final TreeTablePosition<P, ?> focusedCell = getFocusModel().getFocusedCell();
+
+            final TreeTableColumn<P, ?> focusedColumn = focusedCell == null ? null : focusedCell.getTableColumn();
+
+            if( getFocusModel().getFocusedIndex() != index )
+            {
+                if( focusedColumn == null )
+                    getFocusModel().focus(index);
+                else
+                    getFocusModel().focus(index, focusedColumn);
+            }
+
             if( !isItemVisible(index) )
                 scrollTo(index);
         });
@@ -309,7 +322,62 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
 
         initPlaceHolder();
 
-        initMouse();
+        getSelectionModel()
+            .selectedItemProperty()
+                .addListener( (observable, oldItem, newItem) -> scheduleFocusSynchronization(newItem) );
+    }
+
+    private void scheduleFocusSynchronization(
+            TreeItem<P> expectedItem
+    )
+    {
+        if( expectedItem == null )
+            return;
+
+        Platform.runLater(() -> {
+
+            /*
+             * За время ожидания selection мог измениться ещё раз.
+             */
+            if( getSelectionModel().getSelectedItem()
+                    != expectedItem )
+            {
+                return;
+            }
+
+            final int selectedIndex =
+                    getRow(expectedItem);
+
+            if( selectedIndex < 0 )
+                return;
+
+            final int focusedIndex =
+                    getFocusModel().getFocusedIndex();
+
+            final TreeItem<P> focusedItem =
+                    focusedIndex < 0
+                            ? null
+                            : getTreeItem(focusedIndex);
+
+            if( focusedItem == expectedItem )
+                return;
+
+            final TreeTablePosition<P, ?> focusedCell =
+                    getFocusModel().getFocusedCell();
+
+            final TreeTableColumn<P, ?> focusedColumn =
+                    focusedCell == null
+                            ? null
+                            : focusedCell.getTableColumn();
+
+            if( focusedColumn == null )
+                getFocusModel().focus(selectedIndex);
+            else
+                getFocusModel().focus(
+                        selectedIndex,
+                        focusedColumn
+                );
+        });
     }
 
     /** */
@@ -317,44 +385,44 @@ public class JInvTreeTableEx<P> extends TreeTableView<P> implements IJInvControl
         return ((JInvTreeTableViewSkin)getSkin()).getInfoBar();
     }
 
-    private void initMouse() {
+    private void initMouse()
+    {
+        addEventFilter(
+                MouseEvent.MOUSE_PRESSED,
+                event -> {
+                    Node node = event.getTarget() instanceof Node ? (Node) event.getTarget() : null;
 
-        this.setOnMousePressed(event -> {
+                    while( node != null && !(node instanceof TreeTableCell) )
+                    {
+                        node = node.getParent();
+                    }
 
-            EventTarget target = event.getTarget();
+                    if( !(node instanceof TreeTableCell) )
+                        return;
 
-            if (!(target instanceof TreeTableCell) && target instanceof Node) {
-                target = ((Node) target).getParent();
-            }
+                    final TreeTableCell<P, ?> cell = (TreeTableCell<P, ?>) node;
 
-            if (!(target instanceof TreeTableCell)) {
-                return;
-            }
+                    final TreeTableRow<P> row = cell.getTreeTableRow();
 
-            final TreeTableCell<P,?> cell = (TreeTableCell) target;
-            final TreeTableRow<P> row = cell.getTreeTableRow();
+                    if( row == null || row.isEmpty() )
+                        return;
 
-            if (row == null || row.isEmpty()) {
-                return;
-            }
+                    final int index = row.getIndex();
 
-            final int index = row.getIndex();
+                    if( index < 0 )
+                        return;
 
-            if (index < 0) {
-                return;
-            }
+                    final TreeTableColumn<P, ?> column =
+                            cell.getTableColumn();
 
-            final TreeTableColumn<P,?> tableColumn = cell.getTableColumn();
+                    if( column == null )
+                        getFocusModel().focus(index);
+                    else
+                        getFocusModel().focus(index, column);
 
-            if (tableColumn == null) {
-                getFocusModel().focus(index);
-                getSelectionModel().select(index);
-            }
-            else {
-                getFocusModel().focus(index, tableColumn);
-                getSelectionModel().select(index, tableColumn);
-            }
-        });
+                    // selection здесь не трогаем
+                }
+        );
     }
 
 

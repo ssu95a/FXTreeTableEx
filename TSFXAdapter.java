@@ -182,10 +182,10 @@ public class TSFXAdapter<P>
         this.treeDataSet.addDataSetListener(this);
         this.treeDataSet.addRowsListener   (this);
 
-        this.treeTableView.addEventHandler( KeyEvent.KEY_RELEASED,    ( KeyEvent event   ) -> refreshCurrentRow() );
-        this.treeTableView.addEventFilter ( MouseEvent.MOUSE_RELEASED,( MouseEvent event ) -> refreshCurrentRow() );
-        this.treeTableView.addEventFilter ( MouseEvent.MOUSE_PRESSED, ( MouseEvent event ) -> refreshCurrentRow() );
-        this.treeTableView.addEventFilter ( MouseEvent.DRAG_DETECTED, ( MouseEvent event ) -> refreshCurrentRow() );
+//        this.treeTableView.addEventHandler( KeyEvent.KEY_RELEASED,    ( KeyEvent event   ) -> refreshCurrentRow() );
+//        this.treeTableView.addEventFilter ( MouseEvent.MOUSE_RELEASED,( MouseEvent event ) -> refreshCurrentRow() );
+//        this.treeTableView.addEventFilter ( MouseEvent.MOUSE_PRESSED, ( MouseEvent event ) -> refreshCurrentRow() );
+//        this.treeTableView.addEventFilter ( MouseEvent.DRAG_DETECTED, ( MouseEvent event ) -> refreshCurrentRow() );
 
         this.treeTableView.setShowRoot( false );
         this.treeTableView.setRoot( new TreeItem<>() );
@@ -283,7 +283,7 @@ public class TSFXAdapter<P>
     }
 
     /** Признак что TableView is JInvTreeTableEx */
-    public boolean isJInvTreeTableEx() { return treeTableView != null && treeTableView instanceof TreeTableView; }
+    public boolean isJInvTreeTableEx() { return  treeTableView instanceof JInvTreeTableEx; }
 
     /** Признак, что записей нет */
     private ReadOnlyBooleanWrapper emptyProperty;
