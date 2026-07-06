@@ -320,32 +320,50 @@ public class TSFXAdapter<P>
             return null;
 
         return getTreeTable().getScene().getWindow();
-    }    
-    
+    }
+
+
+    private boolean insideMarkItem;
+
     /** */
     @Override
-    public void markAction( TreeDataSetMarkEvent<P> event ) {
-        if( event.isAfter() ) {
-            //refreshItem();
-        }
+    public void markAction( TreeDataSetMarkEvent<P> event )
+    {
+        if( !event.isAfter() || insideMarkItem || event.getItem() == null )
+            return;
+
+        if( Platform.isFxApplicationThread() )
+            treeTableView.refresh();
+        else
+            Platform.runLater( treeTableView::refresh );
     }
+
 
     /** */
-    private void markItem( TreeItem<P> treeItem, boolean doMark ) {
+    private void markItem( TreeItem<P> treeItem, boolean doMark )
+    {
+        if( !isEnableMark() || !isXXI() )
+            return;
 
-        if( isEnableMark() && isXXI() )
+        insideMarkItem = true;
+
+        try
         {
-            try {
-                if(doMark)
-                    ((XXITreeDataSet<P>)getTreeDataSet()).markItem((ITreeDataSetItem<P>)treeItem);
-                else
-                    ((XXITreeDataSet<P>)getTreeDataSet()).unMarkItem((ITreeDataSetItem<P>)treeItem);
-            }
-            catch( Throwable th ) {
-                throw new RuntimeException( Tags.PRODUCT_LABEL + "setMark in MarkerColumn error", th );
-            }
+            final XXITreeDataSet<P> dataSet = (XXITreeDataSet<P>) getTreeDataSet();
+
+            if( doMark )
+                dataSet.markItem( (ITreeDataSetItem<P>) treeItem );
+            else
+                dataSet.unMarkItem( (ITreeDataSetItem<P>) treeItem );
+        }
+        catch( Throwable th ) {
+            throw new RuntimeException( Tags.PRODUCT_LABEL + "setMark in MarkerColumn error", th );
+        }
+        finally {
+            insideMarkItem = false;
         }
     }
+
 
     public void markItem  ( TreeItem<P> treeItem ) {
         markItem(treeItem,true);
