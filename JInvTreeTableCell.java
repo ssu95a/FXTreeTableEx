@@ -78,23 +78,33 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
         return row.getItem();
     }
 
-    protected BiConsumer<JInvTreeTableCell, Object> getRenderer() {
-        return (BiConsumer<JInvTreeTableCell, Object>) getTableColumn().getProperties().getOrDefault(COLUMN_USER_RENDERER, null);
+    protected BiConsumer<JInvTreeTableCell<P,T>, Object> getRenderer() {
+        return (BiConsumer<JInvTreeTableCell<P,T>, Object>) getTableColumn().getProperties().getOrDefault(COLUMN_USER_RENDERER, null);
     }
 
     /** */
-    protected void applyRenderer(T item, boolean empty) {
-        if (empty) {
+    protected void applyRenderer(T item, boolean empty)
+    {
+        if( empty )
+        {
             clearCell();
             return;
         }
 
-        if (getRenderer() != null) {
-            getRenderer().accept(this, item);
-        }
+        /*
+         * TreeTableCell виртуализирована и может перейти
+         * напрямую с одной непустой строки на другую.
+         */
+        setTooltip(null);
+        setStyle(S.EMPTY_STRING);
+        setId(null);
+
+        final BiConsumer<JInvTreeTableCell<P,T>, Object> renderer = getRenderer();
+
+        if( renderer != null )
+            renderer.accept(this, item);
     }
 
-    //region Colorizer (copy of JInvTableCell)
 
     private Map<Function<IColoredCell<P>, Colorizer>, Colorizer> colorMap;
 

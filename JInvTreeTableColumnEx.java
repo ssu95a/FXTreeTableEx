@@ -7,6 +7,7 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Control;
 import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
+import javafx.scene.control.TreeTableView;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
 import org.slf4j.Logger;
@@ -263,87 +264,87 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
     }
 
     @Override
-    public void applyViewPrefs() {
-
-        if( this.<Boolean>getProperty(COLUMN_MARK, false ) )
+    public void applyViewPrefs( )
+    {
+        if( this.<Boolean>getProperty( COLUMN_MARK, false) )
             return;
 
-        if( prefSaver != null)
-        {
-            final JInvTreeTableEx treeTable = (JInvTreeTableEx)this.getTreeTableView();
+        if( prefSaver == null )
+            return;
 
-            if( treeTable instanceof JInvTreeTableEx) {
-//                if (!((JInvTreeTableEx) treeTable).isEnableColumnManager()) {
-//                    return;
-//                }
-            }
+        final TreeTableView<P> view = getTreeTableView();
+
+        if( !(view instanceof JInvTreeTableEx) )
+            return;
+
+        final JInvTreeTableEx<P> treeTable = (JInvTreeTableEx<P>) view;
 
             try {
 
                 PPrefComponent p = prefSaver.getInitialPrefs().stream().filter( new PrefFilter() ).findFirst().orElse(null);
 
-                if( p != null )
+                if( p == null )
+                    return;
+
+                //если ширина уже связана, то пропускаем
+                if( !this.prefWidthProperty().isBound() )
                 {
-                    //если ширина уже свзяна, то пропускаем
-                    if( !this.prefWidthProperty().isBound() )
+                    if ( treeTable.getColumnResizePolicy() != JInvTreeTableEx.CONSTRAINED_RESIZE_POLICY )
                     {
-                        if ( treeTable.getColumnResizePolicy() != JInvTreeTableEx.CONSTRAINED_RESIZE_POLICY )
+                        if( p.getWIDTH() <= 0 )
+                            this.setPrefWidth(Control.USE_PREF_SIZE);
+
+                        Long defaultFontWidth = p.getWIDTH();
+
+                        double fontSize = BaseApp.APP().getViewPrefService().getFont().getSize();
+
+                        if( fontSize != ViewPrefAppService.DEFAULT_FONT_SIZE && !getProperties().containsKey(JInvTableColumn.COLUMN_FONT_SIZE_ADJUST))
                         {
-                            if( p.getWIDTH() <= 0)
-                                this.setPrefWidth(Control.USE_PREF_SIZE);
-
-                            Long defaultFontWidth = p.getWIDTH();
-
-                            double fontSize = BaseApp.APP().getViewPrefService().getFont().getSize();
-
-                            if( fontSize != ViewPrefAppService.DEFAULT_FONT_SIZE && !getProperties().containsKey(JInvTableColumn.COLUMN_FONT_SIZE_ADJUST))
-                            {
-                                getProperties().put(JInvTableColumn.COLUMN_FONT_SIZE_ADJUST, true);
-                                double correctedWidth = defaultFontWidth * (fontSize / ViewPrefAppService.DEFAULT_FONT_SIZE);
-                                if (ViewPrefAppService.DEBUG_FORM_PARAMETERS){
-                                    logger.info("{}: corrected width {} -> {}",getId(), defaultFontWidth, correctedWidth);
-                                }
-                                this.setPrefWidth(correctedWidth / DIMENSION_FRACTIONAL_FACTOR);
-                            } else {
-                                this.setPrefWidth(defaultFontWidth / DIMENSION_FRACTIONAL_FACTOR);
+                            getProperties().put(JInvTableColumn.COLUMN_FONT_SIZE_ADJUST, true);
+                            double correctedWidth = defaultFontWidth * (fontSize / ViewPrefAppService.DEFAULT_FONT_SIZE);
+                            if (ViewPrefAppService.DEBUG_FORM_PARAMETERS){
+                                logger.info("{}: corrected width {} -> {}",getId(), defaultFontWidth, correctedWidth);
                             }
+                            this.setPrefWidth(correctedWidth / DIMENSION_FRACTIONAL_FACTOR);
+                        } else {
+                            this.setPrefWidth(defaultFontWidth / DIMENSION_FRACTIONAL_FACTOR);
                         }
-                        treeTable.refresh();
                     }
+                    treeTable.refresh();
+                }
 
-                    this.setVisible( p.getVISIBLE() == 1L );
+                this.setVisible( p.getVISIBLE() == 1L );
 
-                    if( p.getORDBY() != null && p.getORDBY() != -1 && treeTable != null )
+                if( p.getORDBY() != null && p.getORDBY() != -1 && treeTable != null )
+                {
+                    int totalColumns = treeTable.getColumns().size();
+
+                    if (totalColumns > 0 )
                     {
-                        int totalColumns = treeTable.getColumns().size();
+                        treeTable.getColumns().remove(this);
+                        totalColumns = treeTable.getColumns().size();
 
-                        if (totalColumns > 0 )
+                        boolean hasMarkColumn = false; //treeTable instanceof JInvTreeTableEx && ((JInvTreeTableEx<S>) treeTable).getMarkColumn() != null;
+
+                        if (BaseApp.APP().getViewPrefService().isMarkLeft() && hasMarkColumn)
                         {
-                            treeTable.getColumns().remove(this);
-                            totalColumns = treeTable.getColumns().size();
-
-                            boolean hasMarkColumn = false; //treeTable instanceof JInvTreeTableEx && ((JInvTreeTableEx<S>) treeTable).getMarkColumn() != null;
-
-                            if (BaseApp.APP().getViewPrefService().isMarkLeft() && hasMarkColumn)
-                            {
-                                int colIndex = Math.min(p.getORDBY() + 1, totalColumns);
-                                treeTable.getColumns().add(colIndex, this);
+                            int colIndex = Math.min(p.getORDBY() + 1, totalColumns);
+                            treeTable.getColumns().add(colIndex, this);
 //                                logger.info("column '{}' added to index {}", getId(), colIndex);
-                            }
-                            else
-                            {
-                                int colIndex = Math.min(p.getORDBY(), totalColumns);
-                                treeTable.getColumns().add(colIndex, this);
+                        }
+                        else
+                        {
+                            int colIndex = Math.min(p.getORDBY(), totalColumns);
+                            treeTable.getColumns().add(colIndex, this);
 //                                logger.info("column '{}' added to index {}", getId(), colIndex);
-                            }
                         }
                     }
                 }
             } catch (Exception ex) {
                 JInvErrorService.handleException(null, ex);
             }
-        }
     }
+
 //region Раскраска (copy of JInvTableColumn)
     void setCellRenderer(BiConsumer<JInvTreeTableCell<P, T>, T> clb) {
         getProperties().put(COLUMN_USER_RENDERER, clb);
