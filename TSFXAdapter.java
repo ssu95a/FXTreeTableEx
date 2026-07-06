@@ -379,7 +379,7 @@ public class TSFXAdapter<P>
                             try {
 
                                 xxiDs.markAll( getItemMarkMode() == ItemMarkMode.LEAF_ONLY );
-                                refreshImpl();
+                                //refreshImpl();
 
                             } catch (Throwable ex) {
                                 Platform.runLater(() -> {
@@ -406,7 +406,7 @@ public class TSFXAdapter<P>
 
                                     xxiDs.unMarkAll();
 
-                                    refreshImpl( );
+                                    //refreshImpl( );
 
                                 } catch (Throwable ex) {
                                     Platform.runLater(() -> {

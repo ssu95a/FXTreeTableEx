@@ -4,6 +4,7 @@ import javafx.css.PseudoClass;
 import javafx.event.ActionEvent;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
@@ -118,28 +119,46 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
 
     /** */
     @Override
-    public void commitEdit(Boolean newValue) {
+    public void commitEdit(Boolean newValue)
+    {
+        final TreeTableRow<P> row = getTreeTableRow();
 
-        super.commitEdit(newValue);
+        final boolean oldValue = Boolean.TRUE.equals(getItem());
 
-        if( getTreeTableRow() == null || getTreeTableRow().isEmpty() )
-            return;
-
-        final TreeItem<P> item = getTreeTableRow().getTreeItem();
-
-        if (item == null) {
+        if( row == null || row.isEmpty() )
+        {
+            checkBox.setSelected(oldValue);
             return;
         }
 
-        if( Boolean.TRUE.equals(newValue) )
+        final TreeItem<P> treeItem = row.getTreeItem();
+
+        if( treeItem == null )
         {
-            adapter.markItem(item);
-            switchMarkColorOnRow(true);
+            checkBox.setSelected(oldValue);
+            return;
         }
-        else
+
+        final boolean mark = Boolean.TRUE.equals(newValue);
+
+        try
         {
-            adapter.unMarkItem(item);
-            switchMarkColorOnRow(false);
+            if( mark )
+                adapter.markItem(treeItem);
+            else
+                adapter.unMarkItem(treeItem);
+
+            super.commitEdit(mark);
+
+            checkBox.setSelected(mark);
+            switchMarkColorOnRow(mark);
+        }
+        catch( RuntimeException ex )
+        {
+            checkBox.setSelected(oldValue);
+            switchMarkColorOnRow(oldValue);
+
+            throw ex;
         }
     }
 
