@@ -115,40 +115,22 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
     }
 
     @Override
-    public void addColor( final Function<IColoredCell<P>, Colorizer> styleExpr ) {
-        Colorizer color = styleExpr.apply( this );
-//        boolean isDebug = toString().contains( "erh" );
-//        String styleBefore = "";
-//        String mapBefore = "";
-//        if ( isDebug ){
-//            styleBefore = getStyle();
-//            mapBefore = getColorMap().toString();
-//        }
+    public void addColor( Function<IColoredCell<P>, Colorizer> styleExpr )
+    {
+        final Colorizer color = styleExpr.apply(this);
 
-        Map<Function<IColoredCell<P>, Colorizer>, Colorizer> colorMap = getColorMap();
-        if ( color != null ){
-            colorMap.remove( styleExpr );
-            colorMap.put( styleExpr, color );
-//            if ( isDebug )
-//            logger.info( "{}: added color {}", this, color );
-        } else {
+        if( color != null )
+            getColorMap().put(styleExpr, color);
 
-            if ( !colorMap.isEmpty() && colorMap.containsKey(styleExpr) ){
-                String s = colorMap.get( styleExpr ).toString();
-                removeColorStyle( s );
-                colorMap.remove( styleExpr );
-//                if ( isDebug )
-//                logger.info( "{}: removed style {}", this, s );
-            }
+        else if( colorMap != null )
+        {
+            final Colorizer oldColor = colorMap.remove(styleExpr);
+
+            if( oldColor != null )
+                removeColorStyle(oldColor.toString());
         }
+
         setStyleInternal();
-//        if ( isDebug ){
-//            logger.info( "Style |{}|\n" +
-//                         "   -> |{}|\n" +
-//                         "Map   |{}|\n" +
-//                         "   -> |{}|", styleBefore, getStyle(), mapBefore, getColorMap().toString()
-//            );
-//        }
     }
 
     private void setStyleInternal(){
@@ -159,31 +141,56 @@ public class JInvTreeTableCell<P,T> extends TreeTableCell<P,T> implements IColor
         pseudoClassStateChanged( COLORIZED_TEXT_SECONDARY, check( IS_CUSTOM_TEXT_SECONDARY ) );
     }
 
+    private boolean check(Predicate<Colorizer> predicate)
+    {
+        if( colorMap == null || colorMap.isEmpty() )
+            return false;
 
-    private boolean check(Predicate<Colorizer> predicate) {
-        return getColorMap().values().stream()
-                .anyMatch( predicate );
+        for( Colorizer colorizer : colorMap.values() )
+        {
+            if( predicate.test(colorizer) )
+                return true;
+        }
+
+        return false;
     }
 
-    private String getColorStyleString() {
-        return getColorMap().values().stream()
-                .map( Colorizer::toString )
-                .collect( Collectors.joining( " " ) );
+    private String getColorStyleString()
+    {
+        if( colorMap == null || colorMap.isEmpty() )
+            return S.EMPTY_STRING;
+
+        return colorMap.values()
+                .stream()
+                .map(Colorizer::toString)
+                .collect(Collectors.joining(" "));
     }
 
     @Override
-    public void clearColor() {
-        Map<Function<IColoredCell<P>, Colorizer>, Colorizer> colorMap = getColorMap();
-
-        if ( !colorMap.isEmpty() ){
+    public void clearColor()
+    {
+        if( colorMap != null && !colorMap.isEmpty() )
+        {
             removeColorStyle();
             colorMap.clear();
         }
 
-        pseudoClassStateChanged( COLORIZED_BACKGROUND, check( IS_CUSTOM_BACKGROUND ) );
-        pseudoClassStateChanged( COLORIZED_BACKGROUND_SECONDARY, check( IS_CUSTOM_BACKGROUND_SECONDARY ) );
-        pseudoClassStateChanged( COLORIZED_TEXT, check( IS_CUSTOM_TEXT ) );
-        pseudoClassStateChanged( COLORIZED_TEXT_SECONDARY, check( IS_CUSTOM_TEXT_SECONDARY ) );
+        pseudoClassStateChanged(
+                COLORIZED_BACKGROUND,
+                false
+        );
+        pseudoClassStateChanged(
+                COLORIZED_BACKGROUND_SECONDARY,
+                false
+        );
+        pseudoClassStateChanged(
+                COLORIZED_TEXT,
+                false
+        );
+        pseudoClassStateChanged(
+                COLORIZED_TEXT_SECONDARY,
+                false
+        );
     }
 
     private void removeColorStyle() {
