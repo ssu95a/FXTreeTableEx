@@ -8,6 +8,7 @@ import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import ru.inversion.dataset.mark.IMarkable;
 import ru.inversion.fx.form.controls.treetableex.JInvTreeTableCell;
 import ru.inversion.fx.form.controls.treetableex.TSFXAdapter;
 
@@ -75,7 +76,7 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
 
     /** */
     private void switchMark() {
-        commitEdit(checkBox.isSelected());
+        applyMark(checkBox.isSelected());
     }
 
     /** */
@@ -118,37 +119,33 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
 
 
     /** */
-    @Override
-    public void commitEdit(Boolean newValue)
+    private void applyMark(boolean mark)
     {
-        final TreeTableRow<P> row = getTreeTableRow();
-
-        final boolean oldValue = Boolean.TRUE.equals(getItem());
+        final TreeTableRow<P> row =
+                getTreeTableRow();
 
         if( row == null || row.isEmpty() )
-        {
-            checkBox.setSelected(oldValue);
             return;
-        }
 
-        final TreeItem<P> treeItem = row.getTreeItem();
+        final TreeItem<P> treeItem =
+                row.getTreeItem();
 
         if( treeItem == null )
-        {
-            checkBox.setSelected(oldValue);
             return;
-        }
 
-        final boolean mark = Boolean.TRUE.equals(newValue);
+        final P value = treeItem.getValue();
+
+        final boolean oldValue = value instanceof IMarkable && ((IMarkable) value).isMark();
 
         try
         {
-            if( mark )
-                adapter.markItem(treeItem);
-            else
-                adapter.unMarkItem(treeItem);
-
-            super.commitEdit(mark);
+            if( mark != oldValue )
+            {
+                if( mark )
+                    adapter.markItem(treeItem);
+                else
+                    adapter.unMarkItem(treeItem);
+            }
 
             checkBox.setSelected(mark);
             switchMarkColorOnRow(mark);
@@ -161,7 +158,6 @@ public final class JInvTreeTableCell_Mark<P> extends JInvTreeTableCell<P, Boolea
             throw ex;
         }
     }
-
     /** */
     private void switchMarkColorOnRow(boolean val) {
 
