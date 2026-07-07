@@ -168,7 +168,6 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
 
     /** Возвращает Идентификатор группы в F7 фильтре */
     public String getIdF7FilterGroup() {
-
         return (String) getProperties().getOrDefault(F7FILTER_GROUP_ID, null);
     }
 
@@ -345,28 +344,56 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
             }
     }
 
-//region Раскраска (copy of JInvTableColumn)
-    void setCellRenderer(BiConsumer<JInvTreeTableCell<P, T>, T> clb) {
-        getProperties().put(COLUMN_USER_RENDERER, clb);
+
+    private BiConsumer<JInvTreeTableCell<P, T>, T> userRenderer;
+    private boolean colorCleanupRequired;
+
+    void setCellRenderer( BiConsumer<JInvTreeTableCell<P, T>, T> renderer )
+    {
+        userRenderer = renderer;
+        rebuildCellRenderer();
+    }
+
+    @SuppressWarnings("unchecked")
+    private void rebuildCellRenderer()
+    {
+        BiConsumer<JInvTreeTableCell<P, T>, T> renderer = userRenderer;
+
+        final BiConsumer<JInvTreeTableCell<P, T>, T> colorRenderer = (BiConsumer<JInvTreeTableCell<P, T>, T>) getProperties().get(COLUMN_COLOR_RENDERER);
+
+        if( colorRenderer != null )
+        {
+            renderer = renderer == null ? colorRenderer : renderer.andThen(colorRenderer);
+        }
+        else if( colorCleanupRequired )
+        {
+            final BiConsumer<JInvTreeTableCell<P, T>, T> cleaner = (cell, value) -> cell.clearColor();
+
+            renderer = renderer == null ? cleaner : renderer.andThen(cleaner);
+        }
+
+        if( renderer == null )
+            getProperties().remove(COLUMN_USER_RENDERER);
+        else
+            getProperties().put(COLUMN_USER_RENDERER, renderer);
     }
 
     /**
      Добавить правило раскраски для определённой колонки
      */
-    public void addColor( final Function<IColoredCell<P>, Colorizer> styleExpr ) {
-        BiConsumer<JInvTreeTableCell<P, T>, T> existingColor =
-            (BiConsumer<JInvTreeTableCell<P, T>, T>) getProperties().getOrDefault( COLUMN_COLOR_RENDERER, null );
+    public void addColor( Function<IColoredCell<P>, Colorizer> styleExpr )
+    {
+        BiConsumer<JInvTreeTableCell<P, T>, T> colorRenderer = (BiConsumer<JInvTreeTableCell<P, T>, T>)getProperties().get(COLUMN_COLOR_RENDERER);
 
-        BiConsumer<JInvTreeTableCell<P, T>, T> colorizer = ( cell, value ) -> cell.addColor( styleExpr );
+        final BiConsumer<JInvTreeTableCell<P, T>, T> newColorizer = (cell, value) -> cell.addColor(styleExpr);
 
-        boolean isClean = existingColor == null;
+        colorRenderer = colorRenderer == null ? newColorizer : colorRenderer.andThen(newColorizer);
 
-        if ( !isClean ) {
-            colorizer = existingColor.andThen( colorizer );
-        }
+        getProperties().put( COLUMN_COLOR_RENDERER, colorRenderer );
 
-        setCellRenderer( colorizer );
-        getProperties().put( COLUMN_COLOR_RENDERER, colorizer );
+        colorCleanupRequired = false;
+
+        rebuildCellRenderer();
     }
 
     // Убрать всю раскраску, заданную через addColor() в данном столбце
@@ -374,12 +401,12 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
     {
         getProperties().remove(COLUMN_COLOR_RENDERER);
 
-        setCellRenderer( (cell, value) -> cell.clearColor() );
+        colorCleanupRequired = true;
+        rebuildCellRenderer();
 
         if( getTreeTableView() != null )
             getTreeTableView().refresh();
     }
-
 
     final public String getToolTipText() {
         return toolTipTextProperty.get();
