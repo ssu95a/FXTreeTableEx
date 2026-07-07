@@ -14,7 +14,6 @@ import java.util.Objects;
 
 /**
  * Столбец TreeTable для отображения денежных данных
- * <p>
  * @author Sulimoff
  */
 public class JInvTreeTableColumnEx_Money<P> extends JInvTreeTableColumnEx<P,BigDecimal> {

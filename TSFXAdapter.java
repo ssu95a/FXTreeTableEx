@@ -548,22 +548,17 @@ public class TSFXAdapter<P>
 
         IEntityMetaData<P> em = EntityMetadataFactory.getEntityMetaData(classEntity);
 
-        for( TreeTableColumn<P,?> column : treeTable.getLeafColumns() )
+        for( TreeTableColumn<P, ?> column : treeTable.getLeafColumns() )
         {
-            if(  column instanceof JInvTreeTableColumnEx_Date)
-            {
-                JInvTreeTableColumnEx_Date bgColumn = (JInvTreeTableColumnEx_Date)column;
-                final IEntityProperty<P, ?> ep = em.getProperty(bgColumn.getFieldName());
-                if( ep != null )
-                    bgColumn.bind( ep, cellValueChangeListener );
-            }
-             else if( column instanceof JInvTreeTableColumnEx)
-             {
-                 JInvTreeTableColumnEx bgColumn = (JInvTreeTableColumnEx)column;
-                 final IEntityProperty<P, ?> ep = em.getProperty(bgColumn.getFieldName());
-                 if( ep != null )
-                     bgColumn.bind(ep,cellValueChangeListener);
-             }
+            if( !(column instanceof JInvTreeTableColumnEx) )
+                continue;
+
+            final JInvTreeTableColumnEx<P, ?> invColumn = (JInvTreeTableColumnEx<P, ?>) column;
+
+            final IEntityProperty<P, ?> property = em.getProperty(invColumn.getFieldName());
+
+            if( property != null )
+                invColumn.bind( (IEntityProperty) property, cellValueChangeListener );
         }
 
         initMarkColumn();

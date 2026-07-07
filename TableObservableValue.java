@@ -19,7 +19,7 @@ public class TableObservableValue extends SimpleObjectProperty {
 
     /** */
     @Override
-    public Object getValue( ) {
+    public Object get( ) {
         if( pojoInstance == null  )
             return null;
         return property.invokeGetter(pojoInstance);
@@ -33,7 +33,7 @@ public class TableObservableValue extends SimpleObjectProperty {
 
     /** */
     @Override
-    public void setValue( Object value ) {
+    public void set( Object value ) {
         if( pojoInstance != null && property != null )
             property.invokeSetter( pojoInstance, value );
     }
