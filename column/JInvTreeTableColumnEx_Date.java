@@ -20,7 +20,7 @@ import java.util.Objects;
  */
 public class JInvTreeTableColumnEx_Date<P, T> extends JInvTreeTableColumnEx<P, T> {
 
-    public JInvTableColumnDate.DateContentType dateFormat = JInvTableColumnDate.DateContentType.DATE_TIME;
+    private JInvTableColumnDate.DateContentType dateFormat = JInvTableColumnDate.DateContentType.DATE_TIME;
 
     public JInvTreeTableColumnEx_Date()
     {
