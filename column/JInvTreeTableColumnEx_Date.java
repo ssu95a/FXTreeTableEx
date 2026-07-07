@@ -32,11 +32,16 @@ public class JInvTreeTableColumnEx_Date<P, T> extends JInvTreeTableColumnEx<P, T
         return dateFormat;
     }
 
-    public void setDateFormat( JInvTableColumnDate.DateContentType dateFormat) {
-        this.dateFormat = dateFormat;
+    public void setDateFormat( JInvTableColumnDate.DateContentType dateFormat )
+    {
+        if( entityProperty != null )
+            throw new IllegalStateException( Tags.PRODUCT_LABEL + "Date format cannot be changed after column binding" );
+
+        this.dateFormat = Objects.requireNonNull( dateFormat, "'dateFormat' is null" );
     }
 
     /** */
+    @Override
     public void bind( IEntityProperty<P, T> ep, ICellValueChangeListener<P> cellValueChangeListener )
     {
         if( entityProperty != null )
