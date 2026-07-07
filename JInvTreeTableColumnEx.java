@@ -3,6 +3,7 @@ package ru.inversion.fx.form.controls.treetableex;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.control.Control;
 import javafx.scene.control.TreeTableCell;
@@ -262,13 +263,47 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
         }
     }
 
+    @SuppressWarnings("unchecked")
+    private ObservableList<TreeTableColumn<P, ?>> getOwnerColumns( JInvTreeTableEx<P> treeTable )
+    {
+        final TreeTableColumn<P, ?> parent = (TreeTableColumn<P, ?>) getParentColumn();
+        return parent == null ? treeTable.getColumns() : parent.getColumns();
+    }
+
+    /** */
+    private void applyColumnOrder( JInvTreeTableEx<P> treeTable, PPrefComponent pref )
+    {
+        final Integer order = pref.getORDBY();
+
+        if( order == null || order < 0 )
+            return;
+
+        final ObservableList<TreeTableColumn<P, ?>> columns = getOwnerColumns(treeTable);
+
+        final int currentIndex = columns.indexOf(this);
+
+        if( currentIndex < 0 )
+            return;
+
+        columns.remove(currentIndex);
+
+        final int targetIndex = Math.min( order, columns.size() );
+
+        columns.add( targetIndex, this );
+    }
+
+
+    /** */
     @Override
     public void applyViewPrefs( )
     {
+        if( prefSaver == null )
+            return;
+
         if( this.<Boolean>getProperty( COLUMN_MARK, false) )
             return;
 
-        if( prefSaver == null )
+        if( !getColumns().isEmpty() )
             return;
 
         final TreeTableView<P> view = getTreeTableView();
@@ -314,31 +349,8 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
 
                 this.setVisible( p.getVISIBLE() == 1L );
 
-                if( p.getORDBY() != null && p.getORDBY() != -1 && treeTable != null )
-                {
-                    int totalColumns = treeTable.getColumns().size();
+                applyColumnOrder( treeTable, p );
 
-                    if (totalColumns > 0 )
-                    {
-                        treeTable.getColumns().remove(this);
-                        totalColumns = treeTable.getColumns().size();
-
-                        boolean hasMarkColumn = false; //treeTable instanceof JInvTreeTableEx && ((JInvTreeTableEx<S>) treeTable).getMarkColumn() != null;
-
-                        if (BaseApp.APP().getViewPrefService().isMarkLeft() && hasMarkColumn)
-                        {
-                            int colIndex = Math.min(p.getORDBY() + 1, totalColumns);
-                            treeTable.getColumns().add(colIndex, this);
-//                                logger.info("column '{}' added to index {}", getId(), colIndex);
-                        }
-                        else
-                        {
-                            int colIndex = Math.min(p.getORDBY(), totalColumns);
-                            treeTable.getColumns().add(colIndex, this);
-//                                logger.info("column '{}' added to index {}", getId(), colIndex);
-                        }
-                    }
-                }
             } catch (Exception ex) {
                 JInvErrorService.handleException(null, ex);
             }
