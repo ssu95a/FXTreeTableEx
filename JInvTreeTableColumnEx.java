@@ -359,24 +359,25 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
     {
         BiConsumer<JInvTreeTableCell<P, T>, T> renderer = userRenderer;
 
-        final BiConsumer<JInvTreeTableCell<P, T>, T> colorRenderer = (BiConsumer<JInvTreeTableCell<P, T>, T>) getProperties().get(COLUMN_COLOR_RENDERER);
-
-        if( colorRenderer != null )
-        {
-            renderer = renderer == null ? colorRenderer : renderer.andThen(colorRenderer);
-        }
-        else if( colorCleanupRequired )
+        if( colorCleanupRequired )
         {
             final BiConsumer<JInvTreeTableCell<P, T>, T> cleaner = (cell, value) -> cell.clearColor();
 
             renderer = renderer == null ? cleaner : renderer.andThen(cleaner);
         }
 
+        final BiConsumer<JInvTreeTableCell<P, T>, T> colorRenderer = (BiConsumer<JInvTreeTableCell<P, T>, T>) getProperties().get(COLUMN_COLOR_RENDERER);
+
+        if( colorRenderer != null )
+            renderer = renderer == null ? colorRenderer : renderer.andThen(colorRenderer);
+
         if( renderer == null )
             getProperties().remove(COLUMN_USER_RENDERER);
         else
-            getProperties().put(COLUMN_USER_RENDERER, renderer);
+            getProperties().put( COLUMN_USER_RENDERER, renderer );
     }
+
+
 
     /**
      Добавить правило раскраски для определённой колонки
@@ -390,8 +391,6 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
         colorRenderer = colorRenderer == null ? newColorizer : colorRenderer.andThen(newColorizer);
 
         getProperties().put( COLUMN_COLOR_RENDERER, colorRenderer );
-
-        colorCleanupRequired = false;
 
         rebuildCellRenderer();
     }
