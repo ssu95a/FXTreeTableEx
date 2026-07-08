@@ -369,26 +369,30 @@ public class JInvTreeTableColumnEx<P, T> extends TreeTableColumn<P, T> implement
     @SuppressWarnings("unchecked")
     private void rebuildCellRenderer()
     {
-        BiConsumer<JInvTreeTableCell<P, T>, T> renderer = userRenderer;
+        BiConsumer<JInvTreeTableCell<P, T>, T> renderer = null;
 
         if( colorCleanupRequired )
-        {
-            final BiConsumer<JInvTreeTableCell<P, T>, T> cleaner = (cell, value) -> cell.clearColor();
+            renderer = (cell, value) -> cell.clearColor();
 
-            renderer = renderer == null ? cleaner : renderer.andThen(cleaner);
+        if( userRenderer != null )
+        {
+            renderer = renderer == null ? userRenderer : renderer.andThen(userRenderer);
         }
 
-        final BiConsumer<JInvTreeTableCell<P, T>, T> colorRenderer = (BiConsumer<JInvTreeTableCell<P, T>, T>) getProperties().get(COLUMN_COLOR_RENDERER);
+        final BiConsumer<JInvTreeTableCell<P, T>, T> colorRenderer =
+                (BiConsumer<JInvTreeTableCell<P, T>, T>)
+                        getProperties().get(COLUMN_COLOR_RENDERER);
 
         if( colorRenderer != null )
+        {
             renderer = renderer == null ? colorRenderer : renderer.andThen(colorRenderer);
+        }
 
         if( renderer == null )
             getProperties().remove(COLUMN_USER_RENDERER);
         else
-            getProperties().put( COLUMN_USER_RENDERER, renderer );
+            getProperties().put(COLUMN_USER_RENDERER, renderer);
     }
-
 
 
     /**
