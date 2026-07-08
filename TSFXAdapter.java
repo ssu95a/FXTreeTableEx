@@ -351,14 +351,20 @@ public class TSFXAdapter<P>
             else
                 dataSet.unMarkItem( (ITreeDataSetItem<P>) treeItem );
         }
-        catch( Throwable th ) {
+        catch( Throwable th )
+        {
             throw new RuntimeException( Tags.PRODUCT_LABEL + "setMark in MarkerColumn error", th );
         }
-        finally {
+        finally
+        {
             insideMarkItem = false;
         }
-    }
 
+        if( Platform.isFxApplicationThread() )
+            treeTableView.refresh();
+        else
+            Platform.runLater( treeTableView::refresh );
+    }
 
     public void markItem  ( TreeItem<P> treeItem ) {
         markItem(treeItem,true);
