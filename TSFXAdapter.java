@@ -333,11 +333,31 @@ public class TSFXAdapter<P>
             Platform.runLater( treeTableView::refresh );
     }
 
+    @SuppressWarnings("unchecked")
+    private ITreeDataSetItem<P> asTreeDataSetItem( TreeItem<P> treeItem )
+    {
+        if( treeItem == null )
+            return null;
 
-    /** */
+        if( !( treeItem instanceof ITreeDataSetItem ) )
+            throw new IllegalArgumentException( Tags.PRODUCT_LABEL + "TreeItem is not ITreeDataSetItem: " + treeItem.getClass().getName() );
+
+        final ITreeDataSetItem<P> dataSetItem = (ITreeDataSetItem<P>) treeItem;
+
+        if( dataSetItem.getDataSet() != getTreeDataSet() )
+            throw new IllegalArgumentException( Tags.PRODUCT_LABEL + "TreeItem belongs to another TreeDataSet" );
+
+        return dataSetItem;
+    }
+
     private void markItem( TreeItem<P> treeItem, boolean doMark )
     {
         if( !isEnableMark() || !isXXI() )
+            return;
+
+        final ITreeDataSetItem<P> dataSetItem = asTreeDataSetItem(treeItem);
+
+        if( dataSetItem == null )
             return;
 
         insideMarkItem = true;
@@ -347,9 +367,9 @@ public class TSFXAdapter<P>
             final XXITreeDataSet<P> dataSet = (XXITreeDataSet<P>) getTreeDataSet();
 
             if( doMark )
-                dataSet.markItem( (ITreeDataSetItem<P>) treeItem );
+                dataSet.markItem(dataSetItem);
             else
-                dataSet.unMarkItem( (ITreeDataSetItem<P>) treeItem );
+                dataSet.unMarkItem(dataSetItem);
         }
         catch( Throwable th )
         {
