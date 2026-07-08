@@ -198,7 +198,7 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
     }
 
     final private BooleanProperty leafOnlyProperty = new SimpleBooleanProperty( this, "leafOnly", false );
-    final private BooleanProperty toggleProperty = new SimpleBooleanProperty  ( this, "toggle", false );
+    final private BooleanProperty toggleProperty   = new SimpleBooleanProperty  ( this, "toggle", false );
 
     public JInvTreeTableColumnEx_CheckBox() {
         super();
@@ -222,29 +222,22 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
     public boolean isToggle() { return toggleProperty.get(); }
     public void setToggle( boolean v ) { toggleProperty.set(v); }
 
-    public void bind( IEntityProperty<P,Boolean> ep, ICellValueChangeListener<P> cellValueChangeListener )
+    @Override
+    public void bind( IEntityProperty<P, Boolean> ep, ICellValueChangeListener<P> cellValueChangeListener )
     {
         if( this.entityProperty != null )
-            throw new IllegalStateException(Tags.PRODUCT_LABEL + "Column '" + getFieldName() + "' already bind" );
+            throw new IllegalStateException( Tags.PRODUCT_LABEL + "Column '" + getFieldName() + "' already bind" );
 
-        this.entityProperty = Objects.requireNonNull( ep, "'entityProperty' is null" );
+        final IEntityProperty<P, Boolean> property = Objects.requireNonNull( ep, "'entityProperty' is null" );
 
-        if( ep.getType() == boolean.class || ep.getType() == Boolean.class )
-        {
-            // final TableBooleanObservableValue bval = new TableBooleanObservableValue(ep);
-            // final StubBooleanObservableValue bval = new StubBooleanObservableValue( ep, cellValueChangeListener );
-            setCellFactory     (  f -> !isToggle() ? new C<>( null ) : new G<>( null ) );
-            setCellValueFactory(
-                    new Callback< CellDataFeatures< P, Boolean >, ObservableValue< Boolean > >() {
-                        @Override
-                        public ObservableValue< Boolean > call( CellDataFeatures< P, Boolean > param ) {
-                            return new StubBooleanObservableValue<>( ep, cellValueChangeListener ).setPojoInstance( param.getValue() == null ? null : param.getValue().getValue() );
-                        }
-                    }
-//                    param -> bval.setPojoInstance( param.getValue() == null ? null : param.getValue().getValue())
-            );
-        }
-        else
-            throw new IllegalStateException("ep.getType() != bool");
-    }
-}
+        final Class<?> propertyType = property.getType();
+
+        if( propertyType != boolean.class && propertyType != Boolean.class )
+            throw new IllegalStateException( Tags.PRODUCT_LABEL + "Column '" + getFieldName() + "' is not boolean type" );
+
+        this.entityProperty = property;
+
+        setCellFactory( f -> !isToggle() ? new C<>( null ) : new G<>( null ) );
+
+        setCellValueFactory(param -> new StubBooleanObservableValue<>( property, cellValueChangeListener ).setPojoInstance( param.getValue() == null ? null : param.getValue().getValue() ) );
+    }}
