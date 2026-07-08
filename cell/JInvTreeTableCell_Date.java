@@ -5,6 +5,7 @@
  */
 package ru.inversion.fx.form.controls.treetableex.cell;
 
+import javafx.geometry.Pos;
 import ru.inversion.fx.form.controls.treetableex.JInvTreeTableCell;
 
 /**
@@ -14,7 +15,7 @@ import ru.inversion.fx.form.controls.treetableex.JInvTreeTableCell;
 public class JInvTreeTableCell_Date<P,T> extends JInvTreeTableCell<P,T> {
 
     public JInvTreeTableCell_Date( ) {
-        super(  );
+        super( Pos.CENTER  );
     }
 
 }
