@@ -80,10 +80,11 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
                   final StringConverter<Boolean> converter )
         {
             super();
-            setSelectedStateCallback(getSelectedProperty);
-            setConverter(converter);
 
             this.toggleSwitch = new ToggleSwitch();
+
+            setSelectedStateCallback(getSelectedProperty);
+            setConverter(converter);
 
             setGraphic(null);
         }
@@ -141,35 +142,6 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
             }
         }
 
-        /** */
-        public void updateItem1( Boolean item, boolean empty ) {
-
-            super.updateItem(item, empty);
-
-            if( empty || !isLeaf() )
-            {
-                setText(null);
-                setGraphic(null);
-            }
-            else
-            {
-                StringConverter<Boolean> c = getConverter();
-
-                if (showLabel) {
-                    setText(c.toString(item));
-                }
-                setGraphic(toggleSwitch);
-
-                if (booleanProperty instanceof BooleanProperty) {
-                    toggleSwitch.selectedProperty().unbindBidirectional((BooleanProperty)booleanProperty);
-                }
-                ObservableValue<?> obsValue = getSelectedProperty();
-                if (obsValue instanceof BooleanProperty) {
-                    booleanProperty = (ObservableValue<Boolean>) obsValue;
-                    toggleSwitch.selectedProperty().bindBidirectional((BooleanProperty)booleanProperty);
-                }
-            }
-        }
         private ObjectProperty<StringConverter<Boolean>> converter =new SimpleObjectProperty<StringConverter<Boolean>>( this, "converter") { protected void invalidated() { updateShowLabel();}};
 
         public final ObjectProperty<StringConverter<Boolean>> converterProperty() {
@@ -194,8 +166,8 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
             return selectedStateCallbackProperty().get();
         }
         private void updateShowLabel() {
-            this.showLabel = converter != null;
-            this.toggleSwitch.setAlignment(showLabel ? Pos.CENTER_LEFT : Pos.CENTER);
+            this.showLabel = getConverter() != null;
+            this.toggleSwitch.setAlignment( showLabel ? Pos.CENTER_LEFT : Pos.CENTER );
         }
         /** */
         private ObservableValue<?> getSelectedProperty() {
