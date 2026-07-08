@@ -113,32 +113,37 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
 
             super.updateItem(item, empty);
 
-            if (booleanProperty instanceof BooleanProperty) {
-                toggleSwitch.selectedProperty().unbindBidirectional((BooleanProperty) booleanProperty);
-                booleanProperty = null;
-            }
-
-            if (empty || !isLeaf()) {
+            if( empty || !isLeaf() ) {
                 setText(null);
                 setGraphic(null);
                 return;
             }
 
+            if( booleanProperty instanceof BooleanProperty )
+            {
+                toggleSwitch.selectedProperty().unbindBidirectional((BooleanProperty) booleanProperty);
+                booleanProperty = null;
+            }
+
             StringConverter<Boolean> c = getConverter();
 
-            if (showLabel && c != null) {
+            if( showLabel && c != null )
                 setText(c.toString(item));
-            } else {
+            else
                 setText(null);
-            }
 
             setGraphic(toggleSwitch);
 
             ObservableValue<?> obsValue = getSelectedProperty();
 
-            if (obsValue instanceof BooleanProperty) {
-                booleanProperty = (ObservableValue<Boolean>) obsValue;
+            if( obsValue instanceof BooleanProperty )
+            {
+                booleanProperty = (ObservableValue<Boolean>)obsValue;
                 toggleSwitch.selectedProperty().bindBidirectional((BooleanProperty) booleanProperty);
+            }
+            else
+            {
+                toggleSwitch.setSelected( Boolean.TRUE.equals(item) );
             }
         }
 
