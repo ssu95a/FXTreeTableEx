@@ -8,6 +8,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.geometry.Pos;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TreeTableCell;
+import javafx.scene.control.TreeTableRow;
 import javafx.scene.control.cell.CheckBoxTreeTableCell;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
@@ -36,14 +37,18 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
 
         private boolean isLeaf()
         {
-            return getTreeTableRow().getTreeItem() != null && getTreeTableRow().getTreeItem().isLeaf();
+            final TreeTableRow<T> row = getTreeTableRow();
+
+            return row != null && row.getTreeItem() != null && row.getTreeItem().isLeaf();
         }
 
         @Override
-        public void updateItem( Boolean item, boolean empty ) {
+        public void updateItem( Boolean item, boolean empty )
+        {
+            final JInvTreeTableColumnEx_CheckBox<T> tableColumn =
+                    (JInvTreeTableColumnEx_CheckBox<T>) getTableColumn();
 
-            final JInvTreeTableColumnEx_CheckBox< T > tableColumn = (JInvTreeTableColumnEx_CheckBox)getTableColumn();
-            if( tableColumn.isLeafOnly() && !isLeaf() )
+            if( !empty && tableColumn.isLeafOnly() && !isLeaf() )
                 empty = true;
 
             super.updateItem( item, empty );
@@ -92,14 +97,15 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
         /** */
         private boolean isLeaf()
         {
-            final JInvTreeTableColumnEx_CheckBox< T > tableColumn = (JInvTreeTableColumnEx_CheckBox)getTableColumn();
+            final JInvTreeTableColumnEx_CheckBox<T> tableColumn = (JInvTreeTableColumnEx_CheckBox<T>) getTableColumn();
 
-            if( tableColumn.isLeafOnly() )
-                return getTreeTableRow().getTreeItem() != null && getTreeTableRow().getTreeItem().isLeaf();
+            if( !tableColumn.isLeafOnly() )
+                return true;
 
-            return true;
+            final TreeTableRow<T> row = getTreeTableRow();
+
+            return row != null && row.getTreeItem() != null && row.getTreeItem().isLeaf();
         }
-
 
         @Override
         public void updateItem(Boolean item, boolean empty) {
