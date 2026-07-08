@@ -111,7 +111,11 @@ public class TSFXAdapter<P>
         }
 
         /** */
-        public TSFXAdapter<P> bind() {
+        public TSFXAdapter<P> bind()
+        {
+
+            Checks.Require.object( treeDataSet, "treeDataSet" );
+            Checks.Require.object( treeTable, "treeTable" );
 
             if( !S.isNullOrEmpty(titleColumn) ) {
 
