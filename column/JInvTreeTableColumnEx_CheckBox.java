@@ -15,12 +15,15 @@ import javafx.util.StringConverter;
 import org.controlsfx.control.ToggleSwitch;
 import ru.inversion.dataset.fx.ICellValueChangeListener;
 import ru.inversion.dataset.fx.StubBooleanObservableValue;
+import ru.inversion.fx.form.controls.renderer.Colorizer;
+import ru.inversion.fx.form.controls.renderer.IColoredCell;
 import ru.inversion.fx.form.controls.treetableex.JInvTreeTableColumnEx;
 import ru.inversion.fx.form.controls.treetableex.JInvTreeTableEx;
 import ru.inversion.meta.IEntityProperty;
 import ru.inversion.utils.Tags;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, Boolean> {
 
@@ -113,16 +116,16 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
 
             super.updateItem(item, empty);
 
-            if( empty || !isLeaf() ) {
-                setText(null);
-                setGraphic(null);
-                return;
-            }
-
             if( booleanProperty instanceof BooleanProperty )
             {
                 toggleSwitch.selectedProperty().unbindBidirectional((BooleanProperty) booleanProperty);
                 booleanProperty = null;
+            }
+
+            if( empty || !isLeaf() ) {
+                setText(null);
+                setGraphic(null);
+                return;
             }
 
             StringConverter<Boolean> c = getConverter();
@@ -204,6 +207,16 @@ public class JInvTreeTableColumnEx_CheckBox<P> extends JInvTreeTableColumnEx<P, 
 
     public boolean isToggle() { return toggleProperty.get(); }
     public void setToggle( boolean v ) { toggleProperty.set(v); }
+
+    @Override
+    public void addColor( Function<IColoredCell<P>, Colorizer> styleExpr ) {
+        throw new UnsupportedOperationException( Tags.PRODUCT_LABEL + "CheckBox column does not support addColor()" );
+    }
+
+    @Override
+    public void clearColor() {
+        throw new UnsupportedOperationException( Tags.PRODUCT_LABEL + "CheckBox column does not support clearColor()" );
+    }
 
     @Override
     public void bind( IEntityProperty<P, Boolean> ep, ICellValueChangeListener<P> cellValueChangeListener )
